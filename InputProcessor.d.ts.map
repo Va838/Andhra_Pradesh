@@ -1,0 +1,1 @@
+{"version":3,"file":"InputProcessor.d.ts","sourceRoot":"","sources":["../../src/interfaces/InputProcessor.ts"],"names":[],"mappings":"AAAA,OAAO,EAAE,SAAS,EAAE,aAAa,EAAE,UAAU,EAAE,MAAM,UAAU,CAAC;AAEhE,MAAM,WAAW,cAAc;IAC7B,aAAa,CAAC,KAAK,EAAE,SAAS,GAAG,OAAO,CAAC;IACzC,WAAW,CAAC,KAAK,EAAE,SAAS,GAAG,aAAa,CAAC;IAC7C,WAAW,CAAC,KAAK,EAAE,aAAa,GAAG,UAAU,CAAC;CAC/C"}

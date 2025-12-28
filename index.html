@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Andhra Local Guide</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        .container {
+            background: white;
+            border-radius: 10px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #555;
+        }
+        select, button {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        button {
+            background: #667eea;
+            color: white;
+            border: none;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        button:hover {
+            background: #5a6fd8;
+        }
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        .response {
+            margin-top: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 5px;
+            border-left: 4px solid #667eea;
+        }
+        .loading {
+            text-align: center;
+            color: #666;
+        }
+        .error {
+            color: #dc3545;
+            background: #f8d7da;
+            border-left-color: #dc3545;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🏛️ Andhra Local Guide</h1>
+        <p style="text-align: center; color: #666; margin-bottom: 30px;">
+            Discover authentic Andhra Pradesh culture, food, festivals, and traditions
+        </p>
+        
+        <form id="culturalForm">
+            <div class="form-group">
+                <label for="category">Select Category:</label>
+                <select id="category" required>
+                    <option value="">Choose a category...</option>
+                    <option value="slang">Local Slang & Expressions</option>
+                    <option value="food">Food & Cuisine</option>
+                    <option value="festival">Festivals & Celebrations</option>
+                    <option value="emotion">Emotional Food Recommendations</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="selection">Select Topic:</label>
+                <select id="selection" required disabled>
+                    <option value="">First select a category...</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="spiceLevel">Spice Preference (for food):</label>
+                <select id="spiceLevel">
+                    <option value="">Any</option>
+                    <option value="low">Low Spice</option>
+                    <option value="medium">Medium Spice</option>
+                    <option value="high">High Spice</option>
+                    <option value="extreme">Extreme Spice</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="dietary">Dietary Preference:</label>
+                <select id="dietary">
+                    <option value="">Any</option>
+                    <option value="veg">Vegetarian</option>
+                    <option value="non-veg">Non-Vegetarian</option>
+                </select>
+            </div>
+
+            <button type="submit" id="submitBtn">Get Cultural Guidance</button>
+        </form>
+
+        <div id="response" class="response" style="display: none;"></div>
+    </div>
+
+    <script>
+        const API_BASE = window.location.origin + '/api';
+        
+        const categorySelect = document.getElementById('category');
+        const selectionSelect = document.getElementById('selection');
+        const form = document.getElementById('culturalForm');
+        const responseDiv = document.getElementById('response');
+        const submitBtn = document.getElementById('submitBtn');
+
+        // Subcategory mappings (fallback if API not available)
+        const subcategories = {
+            slang: ['greeting expressions', 'emotional expressions', 'casual conversation', 'family terms', 'food-related slang'],
+            food: ['street food', 'main meals', 'snacks', 'sweets', 'beverages'],
+            festival: ['Ugadi', 'Sankranti', 'Dussehra', 'Diwali', 'Vinayaka Chavithi'],
+            emotion: ['happy', 'sad', 'stressed', 'tired', 'sick', 'angry']
+        };
+
+        categorySelect.addEventListener('change', async function() {
+            const category = this.value;
+            selectionSelect.innerHTML = '<option value="">Loading...</option>';
+            selectionSelect.disabled = true;
+
+            if (!category) {
+                selectionSelect.innerHTML = '<option value="">First select a category...</option>';
+                return;
+            }
+
+            try {
+                // Try to get subcategories from API, fallback to hardcoded
+                const subs = subcategories[category] || [];
+                selectionSelect.innerHTML = '<option value="">Choose a topic...</option>';
+                subs.forEach(sub => {
+                    const option = document.createElement('option');
+                    option.value = sub;
+                    option.textContent = sub.charAt(0).toUpperCase() + sub.slice(1);
+                    selectionSelect.appendChild(option);
+                });
+                selectionSelect.disabled = false;
+            } catch (error) {
+                selectionSelect.innerHTML = '<option value="">Error loading options</option>';
+            }
+        });
+
+        form.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(form);
+            const category = document.getElementById('category').value;
+            const selection = document.getElementById('selection').value;
+            const spiceLevel = document.getElementById('spiceLevel').value;
+            const dietary = document.getElementById('dietary').value;
+
+            if (!category || !selection) {
+                alert('Please select both category and topic');
+                return;
+            }
+
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Getting guidance...';
+            responseDiv.style.display = 'block';
+            responseDiv.innerHTML = '<div class="loading">🔍 Searching cultural knowledge...</div>';
+
+            try {
+                // For demo purposes, simulate API call with local logic
+                const preferences = {};
+                if (spiceLevel) preferences.spiceLevel = spiceLevel;
+                if (dietary) preferences.dietary = dietary;
+
+                // Simulate response (replace with actual API call)
+                const response = await simulateGuidance(category, selection, preferences);
+                
+                responseDiv.innerHTML = `
+                    <h3>🎯 Cultural Guidance</h3>
+                    <p><strong>Category:</strong> ${category.charAt(0).toUpperCase() + category.slice(1)}</p>
+                    <p><strong>Topic:</strong> ${selection.charAt(0).toUpperCase() + selection.slice(1)}</p>
+                    <div style="margin-top: 15px; padding: 15px; background: white; border-radius: 5px;">
+                        ${response}
+                    </div>
+                `;
+            } catch (error) {
+                responseDiv.innerHTML = `
+                    <div class="error">
+                        <h3>❌ Error</h3>
+                        <p>Sorry, there was an error getting cultural guidance. Please try again.</p>
+                    </div>
+                `;
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Get Cultural Guidance';
+            }
+        });
+
+        // Simulate cultural guidance (replace with actual API call)
+        async function simulateGuidance(category, selection, preferences) {
+            await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate delay
+            
+            const responses = {
+                slang: `The expression "${selection}" is commonly used in Andhra Pradesh. It carries deep cultural meaning and reflects the warm, expressive nature of Telugu speakers. This phrase is typically used in informal settings among friends and family.`,
+                food: `${selection.charAt(0).toUpperCase() + selection.slice(1)} is a beloved part of Andhra cuisine! Known for its bold flavors and authentic preparation, this dish represents the rich culinary heritage of the region. ${preferences.spiceLevel ? `Perfect for ${preferences.spiceLevel} spice lovers!` : ''}`,
+                festival: `${selection} is a significant festival in Andhra Pradesh, celebrated with great enthusiasm and traditional fervor. The festival brings families together and showcases the rich cultural traditions passed down through generations.`,
+                emotion: `When feeling ${selection}, Andhra culture suggests specific comfort foods that provide both physical nourishment and emotional healing. These traditional remedies reflect the deep connection between food and wellbeing in Telugu culture.`
+            };
+
+            return responses[category] || "This is a fascinating aspect of Andhra culture with deep traditional significance.";
+        }
+    </script>
+</body>
+</html>
